@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./App.css";
+import smile from "./assets/smile.png";
+import FontSelector from "./Components.tsx/Font";
+import TextDisplay from "./Components.tsx/TexstDisplay";
 
 function App() {
   const [theme, setTheme] = useState("light");
   const [isSelected, setIsSelected] = useState(false);
   const [inputValue, setInputValue] = useState<string>("");
   const [data, setData] = useState<any>();
+  const [error, setError] = useState(false);
+  const [font, setFont] = useState("Sans Serif");
 
   const HandleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -18,21 +23,36 @@ function App() {
       );
 
       setData(response.data);
+      setError(false);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setError(true);
+      setData(null);
     }
   };
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const handleAudio = () => {
     audioRef.current?.play();
   };
-
+  let audioPlay = "";
+  if (data) {
+    data.map((object: any) =>
+      object.phonetics.map((phonetic: any) => {
+        if (phonetic.audio) {
+          audioPlay = phonetic.audio;
+        }
+      })
+    );
+  }
+  const handleChangeFont = (selectedFont) => {
+    setFont(selectedFont);
+  };
   console.log(data);
   return (
     <div
-      className={` w-full h-full p-6 md:p-0 md:pl-[40px] md:pr-[40px] ${
+      className={` w-screen min-h-screen p-6 md:p-0 md:pl-[40px] md:pr-[40px] lg:pl-[352px] lg:pr-[352px]  md:h-full ${
         theme === "dark" ? "bg-customBack" : "bg-white"
-      }`}
+      } $${font.toLowerCase()}`}
     >
       <div
         className={`flex items-center md:pt-14 ${
@@ -57,27 +77,19 @@ function App() {
             <path d="M11 9h12" />
           </g>
         </svg>
+
         <h1
           className={`text-[14px] ml-auto md:text-[18px] ${
             theme === "dark" ? "text-[#FFFFFF]" : "text-[#2D2D2D]"
           }`}
-        >
-          Mono
-        </h1>
-        <svg
-          className=" ml-4"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="8"
-          viewBox="0 0 14 8"
-        >
-          <path
-            fill="none"
-            stroke="#A445ED"
-            strokeWidth="1.5"
-            d="m1 1 6 6 6-6"
-          />
-        </svg>
+        ></h1>
+        <FontSelector
+          selectedFont={font}
+          onChangeFont={handleChangeFont}
+          theme={theme}
+        />
+        <TextDisplay selectedFont={selectedFont} theme={theme} />
+
         <div className=" w-[1px] h-8 bg-[#E9E9E9] ml-4 "></div>
         <div
           onClick={HandleTheme}
@@ -107,9 +119,9 @@ function App() {
           />
         </svg>
       </div>
-      <div className=" mt-7">
+      <div className=" mt-7 relative">
         <input
-          className={`w-[327px] h-12  rounded-2xl relative p-5 border-none md:w-[689px]  ${
+          className={`w-[327px] h-12 text-[16px]  rounded-2xl  p-5 border-none md:w-[689px] lg:w-full lg:text-[20px]  ${
             theme === "dark"
               ? "bg-[#1F1F1F] text-[#FFFFFF]"
               : "bg-[#F4F4F4] text-[#2D2D2D]"
@@ -119,7 +131,7 @@ function App() {
           onChange={(e) => setInputValue(e.target.value)}
         />
         <svg
-          className=" absolute top-[105px] left-[308px] md:top-[136px] md:left-[686px] "
+          className=" absolute top-[26%]  md:top-[26%] lg:right-6 md:right-6 right-6   "
           xmlns="http://www.w3.org/2000/svg"
           width="18"
           height="18"
@@ -153,12 +165,9 @@ function App() {
             </div>
           )}
         </div>
-        <audio
-          ref={audioRef}
-          hidden
-          src="https://api.dictionaryapi.dev/media/pronunciations/en/car-uk."
-        ></audio>
+        <audio ref={audioRef} hidden src={audioPlay}></audio>
         <svg
+          className={`${error === true ? "hidden" : "show"}`}
           xmlns="http://www.w3.org/2000/svg"
           width="48"
           height="48"
@@ -234,23 +243,44 @@ function App() {
             </div>
           ))}
       </div>
-      <div className=" w-[327px] h-[1px] bg-[#E9E9E9]  md:w-[688px] md:mt-9"></div>
+      <div
+        className={`w-full h-[1px] bg-[#E9E9E9]  md:w-full md:mt-9 ${
+          error === true ? "hidden" : "show"
+        }`}
+      ></div>
       {data && (
         <div className=" pb-[85px] md:pb-[118px]">
           <h1 className=" text-[14px] text-[#757575] mt-6">Source</h1>
-          {data.sourceUrls && data.sourceUrls.length > 0 ? (
-            data.sourceUrls.map((sourceUrl, index) => (
+          {data[0].sourceUrls &&
+            data[0].sourceUrls.length > 0 &&
+            data[0].sourceUrls.map((sourceUrl, index) => (
               <a
                 key={index}
-                className="text-[14px]"
+                className={`text-[14px] ${
+                  theme === "dark" ? "text-[#FFFFFF]" : "text-[#2D2D2D]"
+                }`}
                 href={sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-              ></a>
-            ))
-          ) : (
-            <p>No source information available.</p>
-          )}
+              >
+                {sourceUrl}
+              </a>
+            ))}
+        </div>
+      )}
+      {error && (
+        <div>
+          <div className=" flex flex-col items-center ">
+            <img src={smile} />
+            <h1 className=" text-[#2D2D2D] text-[20px] font-bold mt-8">
+              No Definitions Found
+            </h1>
+            <h2 className=" text-center mt-6">
+              Sorry pal, we couldn't find definitions for the word you were
+              looking for. You can try the search again at a later time or head
+              to the web instead.
+            </h2>
+          </div>
         </div>
       )}
     </div>
