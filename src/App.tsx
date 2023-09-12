@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 import "./App.css";
 import smile from "./assets/smile.png";
 import FontSelector from "./Components.tsx/Font";
-import TextDisplay from "./Components.tsx/TexstDisplay";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -11,7 +10,7 @@ function App() {
   const [inputValue, setInputValue] = useState<string>("");
   const [data, setData] = useState<any>();
   const [error, setError] = useState(false);
-  const [font, setFont] = useState("Sans Serif");
+  const [selectedFont, setSelectedFont] = useState("Sans-serif");
 
   const HandleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -44,15 +43,24 @@ function App() {
       })
     );
   }
-  const handleChangeFont = (selectedFont) => {
-    setFont(selectedFont);
+  const onChangeFont = (font: any) => {
+    setSelectedFont(font);
+    console.log(selectedFont);
   };
-  console.log(data);
+
   return (
     <div
       className={` w-screen min-h-screen p-6 md:p-0 md:pl-[40px] md:pr-[40px] lg:pl-[352px] lg:pr-[352px]  md:h-full ${
         theme === "dark" ? "bg-customBack" : "bg-white"
-      } $${font.toLowerCase()}`}
+      } ${
+        selectedFont === "Sans Serif"
+          ? "'Inter', sans-serif"
+          : selectedFont === "Serif"
+          ? "'Lora', serif"
+          : selectedFont === "Mono"
+          ? "'Inconsolata', monospace"
+          : null
+      }`}
     >
       <div
         className={`flex items-center md:pt-14 ${
@@ -84,11 +92,10 @@ function App() {
           }`}
         ></h1>
         <FontSelector
-          selectedFont={font}
-          onChangeFont={handleChangeFont}
+          selectedFont={selectedFont}
           theme={theme}
+          onChangeFont={onChangeFont}
         />
-        <TextDisplay selectedFont={selectedFont} theme={theme} />
 
         <div className=" w-[1px] h-8 bg-[#E9E9E9] ml-4 "></div>
         <div
@@ -157,10 +164,10 @@ function App() {
                   theme === "dark" ? "text-[#FFFFFF]" : "text-[#2D2D2D]"
                 }`}
               >
-                {data.find((entry) => entry.word)?.word}
+                {data.find((entry: any) => entry.word)?.word}
               </h1>
               <h1 className=" text-[#A445ED] text-[18px] md:text-[24px]">
-                {data.find((entry) => entry.phonetic)?.phonetic}
+                {data.find((entry: any) => entry.phonetic)?.phonetic}
               </h1>
             </div>
           )}
@@ -184,10 +191,10 @@ function App() {
 
       <div className=" flex flex-col gap-3">
         {data &&
-          data.map((entry, entryIndex) => (
+          data.map((entry: any, entryIndex: any) => (
             <div key={entryIndex}>
               {entry.meanings &&
-                entry.meanings.map((meaning, meaningIndex) => (
+                entry.meanings.map((meaning: any, meaningIndex: any) => (
                   <div key={meaningIndex}>
                     <h1 className=" text-[16px] text-[#757575] mt-[31px] flex items-center pb-10 md:text-[24px]">
                       {meaning.partOfSpeech}
@@ -198,23 +205,25 @@ function App() {
                       Meaning
                     </h1>
                     {meaning.definitions &&
-                      meaning.definitions.map((definition, definitionIndex) => (
-                        <div
-                          key={definitionIndex}
-                          className=" flex items-start mt-4 "
-                        >
-                          <div className="w-[5px] h-[5px] bg-[#8F19E8] rounded-full mt-[10px] "></div>
-                          <h2
-                            className={`text-[15px] w-fit ml-5 md:text-[18px] ${
-                              theme === "dark"
-                                ? "text-[#FFFFFF]"
-                                : "text-[#2D2D2D]"
-                            }`}
+                      meaning.definitions.map(
+                        (definition: any, definitionIndex: any) => (
+                          <div
+                            key={definitionIndex}
+                            className=" flex items-start mt-4 "
                           >
-                            {definition.definition}
-                          </h2>
-                        </div>
-                      ))}
+                            <div className="w-[5px] h-[5px] bg-[#8F19E8] rounded-full mt-[10px] "></div>
+                            <h2
+                              className={`text-[15px] w-fit ml-5 md:text-[18px] ${
+                                theme === "dark"
+                                  ? "text-[#FFFFFF]"
+                                  : "text-[#2D2D2D]"
+                              }`}
+                            >
+                              {definition.definition}
+                            </h2>
+                          </div>
+                        )
+                      )}
                     <div className="flex gap-1 flex-wrap mt-6 items-center">
                       {meaning &&
                         meaning.synonyms &&
@@ -225,7 +234,7 @@ function App() {
                             </h1>
                             <ul>
                               {meaning.synonyms.map(
-                                (synonyms, synonymIndex) => (
+                                (synonyms: string, synonymIndex: any) => (
                                   <li
                                     key={synonymIndex}
                                     className="inline text-[#A445ED] text-[16px] font-[700] md:text-[20px]  "
@@ -253,7 +262,7 @@ function App() {
           <h1 className=" text-[14px] text-[#757575] mt-6">Source</h1>
           {data[0].sourceUrls &&
             data[0].sourceUrls.length > 0 &&
-            data[0].sourceUrls.map((sourceUrl, index) => (
+            data[0].sourceUrls.map((sourceUrl: any, index: any) => (
               <a
                 key={index}
                 className={`text-[14px] ${

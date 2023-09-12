@@ -1,6 +1,10 @@
-import React, { useState } from "react";
-
-function FontSelector({ selectedFont, onChangeFont, theme }: propstype) {
+import { useState } from "react";
+type propsType = {
+  selectedFont: string;
+  onChangeFont: any;
+  theme: string;
+};
+function FontSelector({ selectedFont, onChangeFont, theme }: propsType) {
   const [showOptions, setShowOptions] = useState(false);
 
   const fonts = ["Sans-serif", "Serif", "Mono"];
@@ -12,7 +16,9 @@ function FontSelector({ selectedFont, onChangeFont, theme }: propstype) {
   const handleFontChange = (font: any) => {
     onChangeFont(font);
     toggleOptions();
+    console.log(font);
   };
+
   return (
     <div className="relative">
       <div
